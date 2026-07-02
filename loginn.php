@@ -515,7 +515,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'generationConfig' => [
                 'temperature' => 0.35,
                 'topP' => 0.9,
-                'maxOutputTokens' => 900
+                'maxOutputTokens' => 4000
             ]
         ];
 
@@ -742,10 +742,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .top-timer-group button {
-      height: 34px;
-      padding: 0 .8rem;
-      font-size: .76rem;
-      border-radius: 10px;
+      height: 28px;
+      padding: 0 .58rem;
+      font-size: .66rem;
+      border-radius: 8px;
+      gap: .3rem;
     }
 
     .top-timer-group .header-timer {
@@ -850,7 +851,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(320px, 1.2fr) 18px minmax(280px, .9fr);
+      grid-template-columns: minmax(320px, 1.2fr) 18px minmax(280px, 1.2fr);
       gap: 0;
       min-height: 0;
       align-items: start;
@@ -897,7 +898,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     #video-panel .hint-card {
       flex: 1 1 auto;
-      min-height: 0;
+      min-height: 300px;
       display: flex;
       flex-direction: column;
     }
@@ -911,7 +912,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     #video-panel .hint-card .result-body {
       flex: 1 1 auto;
-      min-height: 0;
+      min-height: 260px;
       max-height: none;
       overflow: auto;
     }
@@ -923,10 +924,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     #user-panel button {
-      height: 32px;
-      padding: 0 .75rem;
-      font-size: .74rem;
-      border-radius: 10px;
+      height: 28px;
+      padding: 0 .6rem;
+      font-size: .66rem;
+      border-radius: 9px;
     }
 
     .main-grid.video-hidden #video-panel {
@@ -1142,6 +1143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     button {
+      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       border-radius: 12px;
       border: 1px solid transparent;
       background: transparent;
@@ -1154,7 +1156,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       align-items: center;
       gap: .45rem;
       cursor: pointer;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
+      transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease,
+        color 180ms ease,
+        opacity 180ms ease;
       white-space: nowrap;
     }
 
@@ -1175,13 +1183,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     button.secondary {
-      background: rgba(255,255,255,.04);
-      border-color: var(--border-strong);
+      background: rgba(255,255,255,.025);
+      border-color: rgba(148,163,184,.16);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
 
     button.secondary:hover {
-      background: rgba(255,255,255,.08);
-      border-color: rgba(91,140,255,.32);
+      background:
+        linear-gradient(
+          180deg,
+          rgba(91,140,255,.14),
+          rgba(91,140,255,.07)
+        );
+      border-color: rgba(91,140,255,.38);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 20px rgba(0,0,0,.18),
+        0 0 0 3px rgba(91,140,255,.08),
+        inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    button.secondary:active {
+      transform: translateY(0) scale(.98);
+      box-shadow:
+        0 4px 10px rgba(0,0,0,.14),
+        inset 0 1px 0 rgba(255,255,255,.05);
+    }
+
+    .top-timer-group button .icon {
+      transition:
+        transform 180ms ease,
+        filter 180ms ease;
+    }
+
+    .top-timer-group button:hover .icon {
+      transform: scale(1.12);
+      filter: drop-shadow(0 0 5px rgba(147,197,253,.55));
     }
 
     button.ghost {
@@ -1201,6 +1239,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       height: 30px;
       padding: 0 .72rem;
       font-size: .74rem;
+    }
+
+    .editor-metrics-actions {
+      gap: .38rem !important;
+    }
+
+    .editor-metrics-actions .badge {
+      height: 27px;
+      padding: 0 .62rem;
+      font-size: .68rem;
+      gap: .32rem;
+    }
+
+    .editor-metrics-actions .badge-dot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .editor-metrics-actions #run-btn {
+      height: 27px;
+      padding: 0 .62rem;
+      font-size: .68rem;
+      border-radius: 9px;
+      gap: .32rem;
+    }
+
+    .editor-metrics-actions #reset-btn {
+      height: 27px;
+      padding: 0 .48rem;
+      font-size: .68rem;
+      border-radius: 9px;
+      gap: .3rem;
+    }
+
+    .editor-metrics-actions button .icon {
+      font-size: .7rem;
     }
 
     .status-dot {
@@ -1236,6 +1310,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       overflow: auto;
       font-size: .84rem;
       min-height: 180px;
+    }
+
+    #python-runner-result {
+      margin-top: .95rem;
+    }
+
+    #python-runner-result .result-body {
+      padding: 0;
+      max-height: none;
+      overflow: visible;
+      font-size: .84rem;
+      min-height: 0;
+    }
+
+    .runner-hidden-header {
+      display: none;
     }
 
     .empty-state {
@@ -1348,11 +1438,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       overflow: auto;
     }
 
+    .runner-terminal {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,.14);
+      background: rgba(2,6,23,.82);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .runner-terminal-top {
+      height: 38px;
+      padding: 0 .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+      border-bottom: 1px solid rgba(148,163,184,.12);
+      background: rgba(255,255,255,.035);
+    }
+
+    .runner-terminal-left {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      min-width: 0;
+    }
+
+    .runner-terminal-dots {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .runner-terminal-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+
+    .runner-terminal-dots span:nth-child(1) { background: #f87171; }
+    .runner-terminal-dots span:nth-child(2) { background: #fbbf24; }
+    .runner-terminal-dots span:nth-child(3) { background: #4ade80; }
+
+    .runner-terminal-title {
+      color: var(--text-muted);
+      font-size: .72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .runner-terminal-status {
+      font-size: .7rem;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: .22rem .55rem;
+      border: 1px solid rgba(148,163,184,.16);
+      color: var(--text-soft);
+      background: rgba(255,255,255,.04);
+    }
+
+    .runner-terminal-status.ok {
+      color: #86efac;
+      border-color: rgba(34,197,94,.26);
+      background: rgba(34,197,94,.10);
+    }
+
+    .runner-terminal-status.err {
+      color: #fca5a5;
+      border-color: rgba(239,68,68,.26);
+      background: rgba(239,68,68,.10);
+    }
+
+    .runner-terminal-body {
+      padding: .9rem 1rem;
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: .78rem;
+      line-height: 1.65;
+      color: #dbeafe;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 150px;
+    }
+
+    .runner-command { color: #93c5fd; }
+    .runner-muted { color: #8393b3; }
+    .runner-success { color: #86efac; }
+    .runner-error { color: #fca5a5; }
+
+    .runner-output-block {
+      margin-top: .65rem;
+      padding-top: .65rem;
+      border-top: 1px dashed rgba(148,163,184,.16);
+    }
+
     .hint-box-text,
     .video-card p,
     .hint-card p {
       margin: 0;
-      font-size: .86rem;
+      font-size: .78rem;
       line-height: 1.55;
       color: var(--text-soft);
     }
@@ -1433,54 +1616,144 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .auth-shell {
-      border-radius: 18px;
-      padding: .85rem;
-      background: rgba(255,255,255,.03);
-      margin-bottom: .9rem;
+      margin: 0 0 0 auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      flex: 0 0 auto;
+      max-width: 100%;
     }
 
     .auth-box {
       display: flex;
-      flex-direction: column;
-      gap: .75rem;
+      align-items: center;
+      gap: .4rem;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .auth-head {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      min-width: 0;
+      flex: 0 0 auto;
+    }
+
+    .auth-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: rgba(91,140,255,.12);
+      border: 1px solid rgba(91,140,255,.18);
+      box-shadow: none;
+      font-size: .72rem;
+    }
+
+    .auth-title {
+      font-size: .62rem;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .auth-subtitle {
+      display: none;
+    }
+
+    .auth-google-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0;
+      min-height: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      flex: 0 0 auto;
+    }
+
+    .auth-google-wrap > div {
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-note {
+      display: none;
+    }
+
+    .ai-assistant-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .55rem;
+      flex-wrap: nowrap;
     }
 
     .user-inline {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: .75rem;
+      gap: .55rem;
       flex-wrap: wrap;
-      margin-bottom: .9rem;
+      margin: 0 0 0 auto;
+      padding: .55rem .65rem;
+      border-radius: 14px;
+      position: static;
+      width: fit-content;
+      max-width: 100%;
+      align-self: auto;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,.12), transparent 34%),
+        rgba(255,255,255,.035);
+      border: 1px solid rgba(34,197,94,.18);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.04),
+        0 12px 32px rgba(0,0,0,.12);
     }
 
     .user-inline-left {
       display: flex;
       align-items: center;
-      gap: .8rem;
+      gap: .55rem;
       min-width: 0;
     }
 
     .user-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,.26);
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(34,197,94,.30);
       object-fit: cover;
       background: rgba(255,255,255,.05);
+      box-shadow: 0 10px 24px rgba(34,197,94,.12);
       flex: 0 0 auto;
     }
 
     .user-meta {
       display: flex;
       flex-direction: column;
-      gap: .12rem;
+      gap: .16rem;
       min-width: 0;
+    }
+
+    .user-meta::before {
+      content: "Συνδεδεμένος";
+      font-size: .58rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #86efac;
     }
 
     .user-meta strong {
       display: block;
-      font-size: .88rem;
+      font-size: .76rem;
       color: var(--text);
       white-space: nowrap;
       overflow: hidden;
@@ -1500,18 +1773,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .ai-bubble {
-      border-radius: 18px;
-      padding: .95rem 1rem;
+      align-self: flex-start;
+      width: fit-content;
+      max-width: 92%;
+      border-radius: 14px;
+      padding: .65rem .75rem;
       border: 1px solid var(--border);
       background: rgba(255,255,255,.04);
       color: var(--text);
-      line-height: 1.66;
+      line-height: 1.55;
       white-space: pre-wrap;
       word-break: break-word;
-      font-size: .84rem;
+      font-size: .78rem;
     }
 
     .ai-bubble.user {
+      align-self: flex-end;
       background: rgba(91,140,255,.10);
       border-color: rgba(91,140,255,.20);
     }
@@ -1523,6 +1800,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .ai-bubble.system {
       background: rgba(255,255,255,.03);
       color: var(--text-soft);
+    }
+
+    .ai-bubble.typing {
+      width: fit-content;
+      min-width: 56px;
+      padding: .55rem .75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .typing-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 14px;
+    }
+
+    .typing-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--text-soft);
+      opacity: .55;
+      animation: typingBounce 1s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: .15s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: .30s;
+    }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% {
+        transform: translateY(0);
+        opacity: .45;
+      }
+
+      40% {
+        transform: translateY(-7px);
+        opacity: 1;
+      }
     }
 
     .chatbox {
@@ -1569,6 +1891,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       flex-wrap: wrap;
     }
 
+    .chatbox-toolbar-right button {
+      height: 32px;
+      padding: 0 .7rem;
+      font-size: .74rem;
+      border-radius: 10px;
+      gap: .35rem;
+    }
+
     .ai-field {
       min-width: 180px;
       height: 36px;
@@ -1585,7 +1915,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .ai-response-info {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       gap: .6rem;
       flex-wrap: wrap;
@@ -1784,6 +2114,333 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       box-shadow: 0 16px 34px rgba(34,197,94,.28);
     }
 
+
+
+    .bottom-terminal-panel {
+      position: fixed;
+      left: 50%;
+      right: auto;
+      bottom: .9rem;
+      width: min(1600px, calc(100vw - 2.4rem));
+      height: 345px;
+      z-index: 9000;
+      transform: translate(-50%, calc(100% + 1.25rem));
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        transform var(--panel-anim),
+        opacity 160ms ease,
+        visibility 0s linear 320ms,
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg) var(--radius-lg) 20px 20px;
+      background:
+        radial-gradient(circle at top left, rgba(91,140,255,.10), transparent 34%),
+        var(--surface-2);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      color: var(--text);
+    }
+
+    .bottom-terminal-panel.is-open {
+      transform: translate(-50%, 0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        transform var(--panel-anim),
+        opacity 140ms ease,
+        visibility 0s linear 0s,
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast);
+      border-color: rgba(91,140,255,.26);
+      box-shadow:
+        0 0 0 4px rgba(91,140,255,.08),
+        var(--shadow-lg);
+    }
+
+    .bottom-terminal-header {
+      height: 44px;
+      padding: 0 .95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      border-bottom: 1px solid rgba(148,163,184,.10);
+      background: rgba(255,255,255,.035);
+      cursor: default;
+      user-select: none;
+      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .bottom-terminal-tabs {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      height: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .bottom-terminal-tab {
+      height: 30px;
+      padding: 0 .7rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: none;
+    }
+
+    button.bottom-terminal-tab,
+    button.bottom-terminal-tab:hover,
+    button.bottom-terminal-tab:active {
+      height: 30px;
+      padding: 0 .7rem;
+      background: transparent;
+      color: var(--text-muted);
+      box-shadow: none;
+      transform: none;
+    }
+
+    button.bottom-terminal-tab:hover {
+      background: rgba(91,140,255,.08);
+      border-color: rgba(91,140,255,.14);
+      color: var(--text-soft);
+    }
+
+    .bottom-terminal-tab.is-active {
+      color: var(--text);
+      background: var(--accent-soft);
+      border-color: rgba(91,140,255,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+
+    .bottom-terminal-tab.is-active::after {
+      content: "";
+      position: absolute;
+      left: .7rem;
+      right: .7rem;
+      bottom: 4px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      opacity: .95;
+    }
+
+    .bottom-terminal-actions {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      height: 100%;
+      color: var(--text-soft);
+      flex: 0 0 auto;
+    }
+
+    .bottom-terminal-shell-name {
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: 0 .6rem;
+      border-radius: 999px;
+      background: rgba(91,140,255,.08);
+      border: 1px solid rgba(91,140,255,.12);
+      color: var(--text-soft);
+      font-size: .72rem;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: none;
+    }
+
+    .bottom-terminal-icon-btn,
+    .bottom-terminal-toggle {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: rgba(91,140,255,.06);
+      color: var(--text-soft);
+      box-shadow: none;
+      font-size: .82rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bottom-terminal-icon-btn:hover,
+    .bottom-terminal-toggle:hover {
+      background: rgba(91,140,255,.12);
+      border-color: rgba(91,140,255,.16);
+      color: var(--text);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .bottom-terminal-icon-btn.is-active {
+      background: rgba(91,140,255,.16);
+      border-color: rgba(91,140,255,.24);
+      color: var(--text);
+    }
+
+    .bottom-terminal-content {
+      height: calc(100% - 44px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,.008)),
+        rgba(2,6,23,.78);
+    }
+
+    .bottom-terminal-pane {
+      height: 100%;
+      min-height: 0;
+      display: none;
+      flex-direction: column;
+    }
+
+    .bottom-terminal-pane.is-active {
+      display: flex;
+    }
+
+    .bottom-terminal-panel.is-split .bottom-terminal-pane:not([data-terminal-panel="terminal"]) .bottom-terminal-output {
+      display: block;
+    }
+
+    .bottom-terminal-command-row {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .78rem 1rem .45rem;
+      border: 0;
+      background: transparent;
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    .bottom-terminal-input {
+      flex: 1 1 auto;
+      height: 26px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      padding: 0;
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: .78rem;
+      font-weight: 700;
+      caret-color: var(--accent);
+      box-shadow: none;
+    }
+
+    .bottom-terminal-input:focus,
+    .bottom-terminal-input:hover {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .bottom-terminal-output {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: .25rem 1rem .9rem;
+      overflow: auto;
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: .78rem;
+      line-height: 1.65;
+      color: #dbeafe;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: transparent;
+    }
+
+    .bottom-terminal-panel.is-split .bottom-terminal-output {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: .8rem;
+    }
+
+    .bottom-terminal-split-pane {
+      min-height: 0;
+      overflow: auto;
+      padding-right: .8rem;
+      border-right: 1px solid rgba(148,163,184,.12);
+    }
+
+    .bottom-terminal-split-pane:last-child {
+      border-right: 0;
+      padding-right: 0;
+      padding-left: .2rem;
+    }
+
+    button.bottom-terminal-icon-btn:not(.secondary):not(.ghost):not(.danger),
+    button.bottom-terminal-toggle:not(.secondary):not(.ghost):not(.danger) {
+      background: rgba(91,140,255,.06);
+      color: var(--text-soft);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    button.bottom-terminal-icon-btn:not(.secondary):not(.ghost):not(.danger):hover,
+    button.bottom-terminal-toggle:not(.secondary):not(.ghost):not(.danger):hover {
+      background: rgba(91,140,255,.12);
+      color: var(--text);
+      border-color: rgba(91,140,255,.16);
+      box-shadow: none;
+      transform: none;
+    }
+
+    button.bottom-terminal-tab:not(.secondary):not(.ghost):not(.danger) {
+      background: transparent;
+      color: var(--text-muted);
+      box-shadow: none;
+      border-color: transparent;
+    }
+
+    button.bottom-terminal-tab.is-active:not(.secondary):not(.ghost):not(.danger) {
+      color: var(--text);
+      background: var(--accent-soft);
+      border-color: rgba(91,140,255,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+
+    .bottom-terminal-input::selection {
+      background: rgba(91,140,255,.32);
+    }
+
+
+    .terminal-line-command { color: #93c5fd; }
+    .terminal-line-muted { color: var(--text-muted); }
+    .terminal-line-success { color: #86efac; }
+    .terminal-line-error { color: #fca5a5; }
+    .terminal-line-path { color: #bfdbfe; }
+    .terminal-line-vscode-info { color: var(--text-soft); }
+
+    html.is-fullscreen .bottom-terminal-panel,
+    body.is-fullscreen .bottom-terminal-panel {
+      width: calc(100vw - 1.5rem);
+      bottom: .75rem;
+    }
+
     @media (max-width: 1080px) {
       .main-grid {
         grid-template-columns: 1fr;
@@ -1812,6 +2469,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         display: none;
       }
     }
+
+  .compact-response-card {
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .ai-response-wrapper {
+    margin-top: 0;
+    height: 100%;
+    flex: 1 1 auto;
+  }
+
+  #video-panel .compact-response-card .result-body {
+    flex: 1 1 auto;
+    min-height: 220px;
+    max-height: none;
+    overflow: auto;
+  }
+
+  .ai-response-wrapper .result-header {
+    padding: .55rem .75rem;
+    font-size: .72rem;
+  }
+
+  .card-title-icon img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
   </style>
 </head>
 <body>
@@ -1822,20 +2510,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="top-timer-group" style="margin-bottom: .9rem;">
             <div class="header-timer" id="header-timer">
               <span class="header-timer-dot"></span>
-              <span class="header-timer-label">Χρόνος</span>
+              <span class="header-timer-label">Clock</span>
               <span class="header-timer-value" id="header-timer-value">00:00</span>
             </div>
 
             <button id="start-timer-btn" class="ghost">
-              <span class="icon">⏱</span> Έναρξη χρόνου
+              <span class="icon">⏱</span> Start Timer
             </button>
 
             <button id="stop-timer-btn" class="ghost">
-              <span class="icon">⏹</span> Λήξη χρόνου
+              <span class="icon">⏹</span> Stop Timer
             </button>
 
             <button id="submit-btn" class="secondary">
-              <span class="icon">💾</span> Υποβολή
+              <span class="icon">💾</span> Submit
             </button>
 
             <div class="status-badges">
@@ -1852,12 +2540,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="card-header-line">
             <div class="card-title-block">
               <div class="card-title">
-                <span class="card-title-icon">💻</span>
+                <span class="card-title-icon">
+                  <img src="python.png" alt="Python">
+                </span>
                 <span>Python Code Editor</span>
               </div>
             </div>
 
-            <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;">
+            <div class="editor-metrics-actions" style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;">
               <span class="badge">Runs <strong id="run-count">0</strong></span>
               <span class="badge">Events <strong id="event-count">0</strong></span>
               <span class="badge badge--dirty" id="dirty-indicator">
@@ -1867,7 +2557,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="icon">▶</span> Run
               </button>
               <button id="reset-btn" class="ghost">
-                <span class="icon">↺</span> Καθαρισμός
+                <span class="icon">↺</span> Clear
               </button>
             </div>
           </div>
@@ -1889,7 +2579,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="editor-footer">
               <span><span class="status-dot"></span> Python</span>
-              <span id="last-run-status">Καμία εκτέλεση ακόμη</span>
+              <span id="last-run-status">No runs yet</span>
             </div>
           </div>
 
@@ -1898,7 +2588,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="status-bar">
               <span class="status-pill">
                 <span class="status-dot" id="status-dot"></span>
-                <span id="global-status-text">Έτοιμο για εκτέλεση</span>
+                <span id="global-status-text">Ready to execute</span>
               </span>
               <span class="timer-text">
                 Χρόνος: <span class="timer-number" id="timer">0s</span>
@@ -1906,10 +2596,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <div class="result-wrapper" id="python-runner-result">
-            <div class="result-header">
-              <span id="result-header-title">Python Runner</span>
-              <span id="test-summary">0 scripts executed</span>
+          <div id="python-runner-result">
+            <div class="result-header runner-hidden-header">
+              <span id="result-header-title">Run Console</span>
+              <span id="test-summary">Ready</span>
             </div>
             <div class="result-body" id="result-body"></div>
           </div>
@@ -1920,34 +2610,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <aside class="stack" id="video-panel">
         <div class="video-card">
-          <div class="card-title">
-            <span class="card-title-icon">🤖</span>
-            <span>AI Assistant</span>
-          </div>
-
-          <p>Χρησιμοποίησε το AI μόνο για hints και καθοδήγηση.</p>
-
-          <div class="auth-shell">
-            <div class="auth-box">
-              <div id="google-btn"></div>
+          <div class="ai-assistant-header">
+            <div class="card-title">
+              <span class="card-title-icon">֎</span>
+              <span>AI Assistant</span>
             </div>
-          </div>
 
-          <div id="user-panel" class="user-inline" style="display:none;">
-            <div class="user-inline-left">
-              <img id="user-picture" class="user-avatar" src="" alt="avatar" referrerpolicy="no-referrer" />
-              <div class="user-meta">
-                <strong id="user-name"></strong>
+            <div class="auth-shell">
+              <div class="auth-box">
+                <div class="auth-head">
+                  <div class="auth-icon">🔐</div>
+
+                  <div>
+                    <div class="auth-title">Connect</div>
+                    <div class="auth-subtitle">
+                      Συνδέσου για να χρησιμοποιήσεις το Gemini Assistant.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="auth-google-wrap">
+                  <div id="google-btn"></div>
+                </div>
+
+                <div class="auth-note">
+                  Η σύνδεση χρησιμοποιείται μόνο για την αναγνώριση του συμμετέχοντα και την αποθήκευση της συνεδρίας.
+                </div>
               </div>
             </div>
 
-            <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
-              <button id="logout-btn" class="secondary">
-                <span class="icon">🚪</span> Αποσύνδεση
-              </button>
+            <div id="user-panel" class="user-inline" style="display:none;">
+              <div class="user-inline-left">
+                <img id="user-picture" class="user-avatar" src="" alt="avatar" referrerpolicy="no-referrer" />
+                <div class="user-meta">
+                  <strong id="user-name"></strong>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+                <button id="logout-btn" class="secondary">
+                  <span class="icon">➜]</span> 
+                </button>
+              </div>
             </div>
           </div>
 
+          <p>Use this assistant for hints and guidance.</p>
+
+          <div class="result-wrapper ai-response-wrapper" style="margin-top:0;">
+            <div class="result-header">
+              <span>Gemini Response</span>
+              <span id="ai-summary">0 responses</span>
+            </div>
+            <div class="result-body">
+              <div class="ai-thread" id="ai-result-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint-card compact-response-card">
           <div class="chatbox">
             <textarea
               id="ai-prompt"
@@ -1967,34 +2688,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
               <div class="chatbox-toolbar-right">
                 <button id="ai-clear-btn" class="secondary">
-                  <span class="icon">🧹</span> Καθαρισμός
+                  Clear Prompt<span class="icon">↩</span> 
                 </button>
                 <button id="ai-run-btn" class="primary">
-                  <span class="icon">✨</span> Ask Gemini
+                  Ask Gemini<span class="icon">▲</span>
                 </button>
               </div>
             </div>
 
             <div class="ai-response-info">
-              <span>Hints μόνο, όχι πλήρης λύση</span>
               <span id="ai-last-run">Καμία κλήση ακόμη</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="hint-card">
-          <div class="card-title">
-            <span class="card-title-icon">💬</span>
-            <span>Gemini Response</span>
-          </div>
-
-          <div class="result-wrapper" style="margin-top:0;">
-            <div class="result-header">
-              <span>Responses</span>
-              <span id="ai-summary">0 responses</span>
-            </div>
-            <div class="result-body">
-              <div class="ai-thread" id="ai-result-body"></div>
             </div>
           </div>
         </div>
@@ -2005,7 +2708,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div id="welcome-overlay" class="welcome-overlay">
     <div class="welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
       <div class="welcome-modal-header">
-        <div class="welcome-modal-icon">🧪</div>
+        <div class="welcome-modal-icon">⚠️</div>
         <div>
           <div id="welcome-title" class="welcome-modal-title">Οδηγίες Πειράματος</div>
           <div class="welcome-modal-subtitle">Διάβασε προσεκτικά πριν ξεκινήσεις.</div>
@@ -2025,7 +2728,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="welcome-modal-actions">
         <button id="welcome-ok-btn" class="welcome-ok-btn">
-          <span class="icon">✓</span> OK
+          <span class="icon">➜</span> 
         </button>
       </div>
     </div>
@@ -2052,6 +2755,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 
   <div id="toast-container" class="toast-container"></div>
+
+  <div id="bottom-terminal-panel" class="bottom-terminal-panel" aria-label="Python terminal" aria-hidden="true">
+    <div id="bottom-terminal-header" class="bottom-terminal-header" aria-expanded="false">
+      <div class="bottom-terminal-tabs">
+        <button class="bottom-terminal-tab" data-terminal-tab="problems" type="button">Problems</button>
+        <button class="bottom-terminal-tab" data-terminal-tab="output" type="button">Output</button>
+        <button class="bottom-terminal-tab" data-terminal-tab="debug" type="button">Debug Console</button>
+        <button class="bottom-terminal-tab is-active" data-terminal-tab="terminal" type="button">Terminal</button>
+      </div>
+
+      <div class="bottom-terminal-actions">
+        <span class="bottom-terminal-shell-name">▸ Python</span>
+        <button id="bottom-terminal-new" class="bottom-terminal-icon-btn" type="button" title="New terminal" aria-label="New terminal">+</button>
+        <button id="bottom-terminal-split" class="bottom-terminal-icon-btn" type="button" title="Split terminal" aria-label="Split terminal">▥</button>
+        <button id="bottom-terminal-toggle" class="bottom-terminal-toggle" type="button" title="Close terminal" aria-label="Close terminal">×</button>
+      </div>
+    </div>
+
+    <div class="bottom-terminal-content">
+      <div id="bottom-terminal-pane-terminal" class="bottom-terminal-pane is-active" data-terminal-panel="terminal">
+        <div class="bottom-terminal-command-row">
+          <input id="bottom-terminal-input" class="bottom-terminal-input" type="text" value="PS C:\workspace&gt; python main.py" spellcheck="false" autocomplete="off" aria-label="Terminal command" />
+        </div>
+        <div id="bottom-terminal-output" class="bottom-terminal-output"><span class="terminal-line-muted">Terminal έτοιμο. Γράψε python main.py και πάτα Enter.</span></div>
+      </div>
+
+      <div id="bottom-terminal-pane-problems" class="bottom-terminal-pane" data-terminal-panel="problems">
+        <div id="bottom-terminal-problems" class="bottom-terminal-output"><span class="terminal-line-success">No problems detected.</span></div>
+      </div>
+
+      <div id="bottom-terminal-pane-output" class="bottom-terminal-pane" data-terminal-panel="output">
+        <div id="bottom-terminal-clean-output" class="bottom-terminal-output"><span class="terminal-line-muted">No output yet. Run python main.py from Terminal.</span></div>
+      </div>
+
+      <div id="bottom-terminal-pane-debug" class="bottom-terminal-pane" data-terminal-panel="debug">
+        <div id="bottom-terminal-debug" class="bottom-terminal-output"><span class="terminal-line-muted">Debug console ready.</span></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     let events = [];
@@ -2121,6 +2863,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     const fullscreenBtn = document.getElementById('fullscreen-btn');
     const toggleVideoBtn = document.getElementById('toggle-video-btn');
+    const bottomTerminalPanel = document.getElementById('bottom-terminal-panel');
+    const bottomTerminalHeader = document.getElementById('bottom-terminal-header');
+    const bottomTerminalToggle = document.getElementById('bottom-terminal-toggle');
+    const bottomTerminalNewBtn = document.getElementById('bottom-terminal-new');
+    const bottomTerminalSplitBtn = document.getElementById('bottom-terminal-split');
+    const bottomTerminalInput = document.getElementById('bottom-terminal-input');
+    const bottomTerminalOutput = document.getElementById('bottom-terminal-output');
+    const bottomTerminalTabs = Array.from(document.querySelectorAll('[data-terminal-tab]'));
+    const bottomTerminalPanes = Array.from(document.querySelectorAll('[data-terminal-panel]'));
+    const bottomTerminalProblems = document.getElementById('bottom-terminal-problems');
+    const bottomTerminalCleanOutput = document.getElementById('bottom-terminal-clean-output');
+    const bottomTerminalDebug = document.getElementById('bottom-terminal-debug');
+    const TERMINAL_PROMPT_TEXT = 'PS C:\\workspace>';
+    const TERMINAL_PROTECTED_PREFIX = TERMINAL_PROMPT_TEXT + ' ';
+    let bottomTerminalIsRunning = false;
 
     const defaultPythonCode = [
       'print("Hello from Python")',
@@ -2216,6 +2973,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       bubble.innerHTML = html;
       aiResultBody.appendChild(bubble);
       aiResultBody.scrollTop = aiResultBody.scrollHeight;
+      return bubble;
+    }
+
+    function appendAiTypingBubble() {
+      return appendAiBubble('assistant typing', `
+        <div class="typing-dots" aria-label="Το Gemini πληκτρολογεί">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      `);
     }
 
     function clearAiThread() {
@@ -2332,6 +3100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     async function runPythonScript(userCode) {
+      const startedAt = performance.now();
       let stdoutBuffer = '';
 
       pyodide.setStdout({
@@ -2343,41 +3112,413 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       try {
         await pyodide.runPythonAsync(userCode);
 
+        const elapsed = ((performance.now() - startedAt) / 1000).toFixed(2);
+
         resultBody.innerHTML = `
-          <div class="test-list">
-            <div class="test-item">
-              <div class="test-title-row">
-                <div class="test-name"><span>▶</span><span>Program Output</span></div>
-                <div class="test-status test-status--ok"><span>●</span><span>Executed</span></div>
+          <div class="runner-terminal">
+            <div class="runner-terminal-top">
+              <div class="runner-terminal-left">
+                <div class="runner-terminal-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="runner-terminal-title">Python Console</div>
               </div>
-              <div class="test-meta">Το script εκτελέστηκε κανονικά.</div>
-              <div class="test-output">${escapeHtml(stdoutBuffer || '(no output)')}</div>
+              <div class="runner-terminal-status ok">EXIT CODE 0</div>
             </div>
+
+            <div class="runner-terminal-body"><span class="runner-command">$ python main.py</span>
+<span class="runner-muted">Process started...</span>
+
+<div class="runner-output-block">${escapeHtml(stdoutBuffer || 'Το πρόγραμμα δεν παρήγαγε output.')}</div>
+
+<span class="runner-success">Process finished successfully in ${elapsed}s</span></div>
           </div>
         `;
 
-        testSummary.textContent = `1 script executed`;
-        lastRunStatus.textContent = "Τελευταία εκτέλεση: script ok";
-        setStatusOk("Το Python script εκτελέστηκε σωστά.");
+        testSummary.textContent = `Finished in ${elapsed}s`;
+        lastRunStatus.textContent = "Last run status: script ok";
+        setStatusOk("Run successful.");
       } catch (err) {
+        const elapsed = ((performance.now() - startedAt) / 1000).toFixed(2);
+
         resultBody.innerHTML = `
-          <div class="test-list">
-            <div class="test-item">
-              <div class="test-title-row">
-                <div class="test-name"><span>!</span><span>Program Error</span></div>
-                <div class="test-status test-status--err"><span>!</span><span>Error</span></div>
+          <div class="runner-terminal">
+            <div class="runner-terminal-top">
+              <div class="runner-terminal-left">
+                <div class="runner-terminal-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="runner-terminal-title">Python Console</div>
               </div>
-              <div class="test-meta">Το script ξεκίνησε αλλά απέτυχε κατά την εκτέλεση.</div>
-              <div class="test-output">${escapeHtml(stdoutBuffer ? stdoutBuffer + "\n\n" : "")}${escapeHtml(String(err))}</div>
+              <div class="runner-terminal-status err">EXIT CODE 1</div>
             </div>
+
+            <div class="runner-terminal-body"><span class="runner-command">$ python main.py</span>
+<span class="runner-muted">Process started...</span>
+
+${stdoutBuffer ? `<div class="runner-output-block">${escapeHtml(stdoutBuffer)}</div>` : ''}
+
+<div class="runner-output-block runner-error">${escapeHtml(String(err))}</div>
+
+<span class="runner-error">Process failed after ${elapsed}s</span></div>
           </div>
         `;
 
-        testSummary.textContent = `1 script executed (with error)`;
-        lastRunStatus.textContent = "Τελευταία εκτέλεση: script error";
-        setStatusError("Το Python script απέτυχε.");
+        testSummary.textContent = `Failed after ${elapsed}s`;
+        lastRunStatus.textContent = "Last run status: script error";
+        setStatusError("Run failed.");
       } finally {
         pyodide.setStdout({ batched: () => {} });
+      }
+    }
+
+    function setBottomTerminalTab(tabName) {
+      const safeTab = tabName || 'terminal';
+
+      bottomTerminalTabs.forEach((tab) => {
+        tab.classList.toggle('is-active', tab.dataset.terminalTab === safeTab);
+      });
+
+      bottomTerminalPanes.forEach((pane) => {
+        pane.classList.toggle('is-active', pane.dataset.terminalPanel === safeTab);
+      });
+
+      setBottomTerminalOpen(true);
+
+      if (safeTab === 'terminal') {
+        setTimeout(() => {
+          bottomTerminalInput?.focus();
+          const len = bottomTerminalInput?.value.length || 0;
+          bottomTerminalInput?.setSelectionRange(len, len);
+        }, 80);
+      }
+
+      recordEvent('terminal_tab_change', { tab: safeTab });
+    }
+
+    function setTerminalPaneContent(target, html) {
+      if (!target) return;
+      target.innerHTML = html;
+      target.scrollTop = target.scrollHeight;
+    }
+
+    function appendTerminalPaneLine(target, html) {
+      if (!target) return;
+      target.insertAdjacentHTML('beforeend', '\n' + html);
+      target.scrollTop = target.scrollHeight;
+    }
+
+    function updateFunctionalTerminalTabs(state) {
+      const commandLine = state.commandLine || TERMINAL_PROTECTED_PREFIX + 'python main.py';
+      const elapsed = state.elapsed || '0.00';
+      const stdout = state.stdout || '';
+      const stderr = state.stderr || '';
+      const error = state.error || '';
+
+      if (state.status === 'running') {
+        setTerminalPaneContent(bottomTerminalCleanOutput, '<span class="terminal-line-muted">Running ' + escapeHtml(commandLine) + '...</span>');
+        setTerminalPaneContent(bottomTerminalProblems, '<span class="terminal-line-muted">Checking current run...</span>');
+        setTerminalPaneContent(bottomTerminalDebug, [
+          '<span class="terminal-line-command">' + escapeHtml(commandLine) + '</span>',
+          '<span class="terminal-line-muted">Runtime: Pyodide</span>',
+          '<span class="terminal-line-muted">Status: running</span>'
+        ].join('\n'));
+        return;
+      }
+
+      if (state.status === 'success') {
+        setTerminalPaneContent(bottomTerminalCleanOutput, stdout ? '<div>' + escapeHtml(stdout) + '</div>' : '<span class="terminal-line-muted">Το πρόγραμμα δεν παρήγαγε output.</span>');
+        setTerminalPaneContent(bottomTerminalProblems, stderr ? '<div class="terminal-line-error">' + escapeHtml(stderr) + '</div>' : '<span class="terminal-line-success">No problems detected.</span>');
+        setTerminalPaneContent(bottomTerminalDebug, [
+          '<span class="terminal-line-command">' + escapeHtml(commandLine) + '</span>',
+          '<span class="terminal-line-muted">Runtime: Pyodide</span>',
+          '<span class="terminal-line-success">Exit code: 0</span>',
+          '<span class="terminal-line-muted">Finished in ' + escapeHtml(elapsed) + 's</span>'
+        ].join('\n'));
+        return;
+      }
+
+      if (state.status === 'error') {
+        setTerminalPaneContent(bottomTerminalCleanOutput, stdout ? '<div>' + escapeHtml(stdout) + '</div>' : '<span class="terminal-line-muted">No stdout before error.</span>');
+        setTerminalPaneContent(bottomTerminalProblems, (stderr ? '<div class="terminal-line-error">' + escapeHtml(stderr) + '</div>\n' : '') + '<div class="terminal-line-error">' + escapeHtml(error || 'Unknown error') + '</div>');
+        setTerminalPaneContent(bottomTerminalDebug, [
+          '<span class="terminal-line-command">' + escapeHtml(commandLine) + '</span>',
+          '<span class="terminal-line-muted">Runtime: Pyodide</span>',
+          '<span class="terminal-line-error">Exit code: 1</span>',
+          '<span class="terminal-line-muted">Failed after ' + escapeHtml(elapsed) + 's</span>'
+        ].join('\n'));
+        return;
+      }
+
+      if (state.status === 'message') {
+        setTerminalPaneContent(bottomTerminalProblems, '<span class="terminal-line-error">' + escapeHtml(state.message || '') + '</span>');
+        appendTerminalPaneLine(bottomTerminalDebug, '<span class="terminal-line-muted">' + escapeHtml(state.message || '') + '</span>');
+      }
+    }
+
+    function setBottomTerminalOpen(open) {
+      bottomTerminalPanel.classList.toggle('is-open', open);
+      bottomTerminalPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      bottomTerminalHeader.setAttribute('aria-expanded', open ? 'true' : 'false');
+      bottomTerminalToggle.textContent = '×';
+      if (open) {
+        setTimeout(() => {
+          bottomTerminalInput?.focus();
+          const len = bottomTerminalInput?.value.length || 0;
+          bottomTerminalInput?.setSelectionRange(len, len);
+        }, 120);
+      }
+    }
+
+    function toggleBottomTerminal() {
+      const isOpen = bottomTerminalPanel.classList.contains('is-open');
+      setBottomTerminalOpen(!isOpen);
+      recordEvent('terminal_toggle', { open: !isOpen });
+    }
+
+    function getActiveTerminalOutputTarget() {
+      return bottomTerminalOutput.querySelector('[data-terminal-pane="active"]') || bottomTerminalOutput;
+    }
+
+    function appendTerminalLine(html) {
+      const target = getActiveTerminalOutputTarget();
+      target.insertAdjacentHTML('beforeend', '\n' + html);
+      target.scrollTop = target.scrollHeight;
+      bottomTerminalOutput.scrollTop = bottomTerminalOutput.scrollHeight;
+    }
+
+    function clearBottomTerminal() {
+      if (bottomTerminalPanel.classList.contains('is-split')) {
+        bottomTerminalOutput.innerHTML = '<div class="bottom-terminal-split-pane" data-terminal-pane="active"><span class="terminal-line-muted">Terminal cleared.</span></div><div class="bottom-terminal-split-pane"><span class="terminal-line-muted">Split terminal ready.</span></div>';
+      } else {
+        bottomTerminalOutput.innerHTML = '<span class="terminal-line-muted">Terminal cleared.</span>';
+      }
+      setTerminalPaneContent(bottomTerminalCleanOutput, '<span class="terminal-line-muted">Output cleared.</span>');
+      setTerminalPaneContent(bottomTerminalProblems, '<span class="terminal-line-success">No problems detected.</span>');
+      setTerminalPaneContent(bottomTerminalDebug, '<span class="terminal-line-muted">Debug console cleared.</span>');
+    }
+
+    function newBottomTerminalSession() {
+      bottomTerminalPanel.classList.remove('is-split');
+      bottomTerminalSplitBtn?.classList.remove('is-active');
+      bottomTerminalOutput.innerHTML = '<span class="terminal-line-muted">New terminal session started.</span>';
+      setTerminalPaneContent(bottomTerminalCleanOutput, '<span class="terminal-line-muted">No output yet. Run python main.py from Terminal.</span>');
+      setTerminalPaneContent(bottomTerminalProblems, '<span class="terminal-line-success">No problems detected.</span>');
+      setTerminalPaneContent(bottomTerminalDebug, '<span class="terminal-line-muted">New terminal session started.</span>');
+      resetTerminalInput();
+      setBottomTerminalOpen(true);
+      recordEvent('terminal_new_session');
+      bottomTerminalInput?.focus();
+    }
+
+    function toggleBottomTerminalSplit() {
+      const willSplit = !bottomTerminalPanel.classList.contains('is-split');
+      bottomTerminalPanel.classList.toggle('is-split', willSplit);
+      bottomTerminalSplitBtn?.classList.toggle('is-active', willSplit);
+
+      if (willSplit) {
+        const currentHtml = bottomTerminalOutput.innerHTML || '<span class="terminal-line-muted">Terminal ready.</span>';
+        bottomTerminalOutput.innerHTML = '<div class="bottom-terminal-split-pane" data-terminal-pane="active">' + currentHtml + '</div><div class="bottom-terminal-split-pane"><span class="terminal-line-muted">Split terminal ready.</span></div>';
+        appendTerminalLine('<span class="terminal-line-muted">Terminal split enabled.</span>');
+      } else {
+        const activePane = bottomTerminalOutput.querySelector('[data-terminal-pane="active"]');
+        bottomTerminalOutput.innerHTML = activePane ? activePane.innerHTML : bottomTerminalOutput.textContent;
+        appendTerminalLine('<span class="terminal-line-muted">Terminal split disabled.</span>');
+      }
+
+      setBottomTerminalOpen(true);
+      recordEvent('terminal_split_toggle', { split: willSplit });
+      bottomTerminalInput?.focus();
+    }
+
+    function getFullTerminalCommandLine() {
+      const raw = (bottomTerminalInput.value || '').trim();
+      if (!raw) return '';
+      return raw.startsWith(TERMINAL_PROTECTED_PREFIX) ? raw : TERMINAL_PROTECTED_PREFIX + raw;
+    }
+
+    function extractTerminalCommand(commandLine) {
+      if (!commandLine) return '';
+      if (commandLine.startsWith(TERMINAL_PROTECTED_PREFIX)) {
+        return commandLine.slice(TERMINAL_PROTECTED_PREFIX.length).trim();
+      }
+      if (commandLine.startsWith(TERMINAL_PROMPT_TEXT)) {
+        return commandLine.slice(TERMINAL_PROMPT_TEXT.length).trim();
+      }
+      return commandLine.trim();
+    }
+
+    function resetTerminalInput(command = 'python main.py') {
+      bottomTerminalInput.value = TERMINAL_PROTECTED_PREFIX + command;
+      const len = bottomTerminalInput.value.length;
+      bottomTerminalInput.setSelectionRange(len, len);
+    }
+
+    function keepCursorAfterTerminalPrompt() {
+      const min = TERMINAL_PROTECTED_PREFIX.length;
+      const start = bottomTerminalInput.selectionStart ?? min;
+      const end = bottomTerminalInput.selectionEnd ?? min;
+
+      if (start < min || end < min) {
+        bottomTerminalInput.setSelectionRange(Math.max(min, start), Math.max(min, end));
+      }
+    }
+
+    function normalizeProtectedTerminalPrompt() {
+      const value = bottomTerminalInput.value || '';
+
+      if (!value.startsWith(TERMINAL_PROTECTED_PREFIX)) {
+        let command = value;
+
+        if (command.startsWith(TERMINAL_PROMPT_TEXT)) {
+          command = command.slice(TERMINAL_PROMPT_TEXT.length).trimStart();
+        }
+
+        bottomTerminalInput.value = TERMINAL_PROTECTED_PREFIX + command;
+      }
+
+      keepCursorAfterTerminalPrompt();
+    }
+
+    function handleProtectedTerminalKeydown(e) {
+      const min = TERMINAL_PROTECTED_PREFIX.length;
+      const start = bottomTerminalInput.selectionStart ?? min;
+      const end = bottomTerminalInput.selectionEnd ?? min;
+      const hasSelection = start !== end;
+
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      if (!hasSelection && e.key === 'Backspace' && start <= min) {
+        e.preventDefault();
+        bottomTerminalInput.setSelectionRange(min, min);
+        return;
+      }
+
+      if (!hasSelection && e.key === 'Delete' && start < min) {
+        e.preventDefault();
+        bottomTerminalInput.setSelectionRange(min, min);
+        return;
+      }
+
+      if (hasSelection && start < min && (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1)) {
+        e.preventDefault();
+        bottomTerminalInput.setSelectionRange(min, Math.max(min, end));
+        return;
+      }
+
+      if (e.key === 'ArrowLeft' && start <= min && end <= min) {
+        e.preventDefault();
+        bottomTerminalInput.setSelectionRange(min, min);
+        return;
+      }
+
+      if (e.key === 'Home') {
+        e.preventDefault();
+        bottomTerminalInput.setSelectionRange(min, min);
+      }
+    }
+
+    async function runBottomTerminalCommand() {
+      if (bottomTerminalIsRunning) return;
+      const commandLine = getFullTerminalCommandLine();
+      const command = extractTerminalCommand(commandLine);
+      if (!command) return;
+
+      setBottomTerminalOpen(true);
+      setBottomTerminalTab('terminal');
+      appendTerminalLine('<span class="terminal-line-command">' + escapeHtml(commandLine) + '</span>');
+      recordEvent('terminal_command', { command });
+
+      if (command === 'clear') {
+        clearBottomTerminal();
+        resetTerminalInput();
+        return;
+      }
+
+      if (command === 'help') {
+        appendTerminalLine('<span class="terminal-line-muted">Available commands: python main.py, python3 main.py, clear, help</span>');
+        resetTerminalInput();
+        return;
+      }
+
+      if (command !== 'python main.py' && command !== 'python3 main.py') {
+        const message = 'Command not found. Use: python main.py';
+        appendTerminalLine('<span class="terminal-line-error">' + message + '</span>');
+        updateFunctionalTerminalTabs({ status: 'message', message });
+        resetTerminalInput(command);
+        return;
+      }
+
+      const userCode = getEditorValue();
+      if (!userCode.trim()) {
+        const message = 'main.py is empty. Write Python code in the editor first.';
+        appendTerminalLine('<span class="terminal-line-error">' + message + '</span>');
+        updateFunctionalTerminalTabs({ status: 'message', message });
+        setStatusError('Δεν υπάρχει κώδικας για εκτέλεση.');
+        return;
+      }
+
+      runCount++;
+      runCountSpan.textContent = runCount.toString();
+      setStatusNeutral('Εκτέλεση Python από terminal.');
+      lastRunStatus.textContent = 'Εκτέλεση από terminal.';
+      bottomTerminalIsRunning = true;
+
+      const startedAt = performance.now();
+      let stdoutBuffer = '';
+      let stderrBuffer = '';
+      updateFunctionalTerminalTabs({ status: 'running', commandLine });
+
+      try {
+        appendTerminalLine('<span class="terminal-line-muted">Initializing Pyodide runtime.</span>');
+        await initPyodideRuntime();
+
+        pyodide.setStdout({
+          batched: (msg) => {
+            stdoutBuffer += msg + '\n';
+          }
+        });
+        pyodide.setStderr({
+          batched: (msg) => {
+            stderrBuffer += msg + '\n';
+          }
+        });
+
+        await pyodide.runPythonAsync(userCode);
+
+        const elapsed = ((performance.now() - startedAt) / 1000).toFixed(2);
+        if (stdoutBuffer) {
+          appendTerminalLine('<div>' + escapeHtml(stdoutBuffer) + '</div>');
+        } else {
+          appendTerminalLine('<span class="terminal-line-muted">Το πρόγραμμα δεν παρήγαγε output.</span>');
+        }
+        if (stderrBuffer) {
+          appendTerminalLine('<div class="terminal-line-error">' + escapeHtml(stderrBuffer) + '</div>');
+        }
+        appendTerminalLine('<span class="terminal-line-success">Process finished successfully in ' + elapsed + 's</span>');
+        updateFunctionalTerminalTabs({ status: 'success', commandLine, stdout: stdoutBuffer, stderr: stderrBuffer, elapsed });
+        lastRunStatus.textContent = 'Τελευταία εκτέλεση terminal: script ok';
+        setStatusOk('Το Python script εκτελέστηκε σωστά από terminal.');
+      } catch (err) {
+        const elapsed = ((performance.now() - startedAt) / 1000).toFixed(2);
+        if (stdoutBuffer) {
+          appendTerminalLine('<div>' + escapeHtml(stdoutBuffer) + '</div>');
+        }
+        if (stderrBuffer) {
+          appendTerminalLine('<div class="terminal-line-error">' + escapeHtml(stderrBuffer) + '</div>');
+        }
+        appendTerminalLine('<div class="terminal-line-error">' + escapeHtml(String(err)) + '</div>');
+        appendTerminalLine('<span class="terminal-line-error">Process failed after ' + elapsed + 's</span>');
+        updateFunctionalTerminalTabs({ status: 'error', commandLine, stdout: stdoutBuffer, stderr: stderrBuffer, error: String(err), elapsed });
+        lastRunStatus.textContent = 'Τελευταία εκτέλεση terminal: script error';
+        setStatusError('Το Python script απέτυχε από terminal.');
+      } finally {
+        if (pyodide) {
+          pyodide.setStdout({ batched: () => {} });
+          pyodide.setStderr({ batched: () => {} });
+        }
+        resetTerminalInput(command);
+        bottomTerminalIsRunning = false;
       }
     }
 
@@ -2440,6 +3581,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       runCountSpan.textContent = runCount.toString();
       lastRunStatus.textContent = "Εκτέλεση...";
       setStatusNeutral("Εκτέλεση Python...");
+      testSummary.textContent = 'Running...';
+      resultBody.innerHTML = `
+        <div class="runner-terminal">
+          <div class="runner-terminal-top">
+            <div class="runner-terminal-left">
+              <div class="runner-terminal-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="runner-terminal-title">Python Console</div>
+            </div>
+            <div class="runner-terminal-status">RUNNING</div>
+          </div>
+
+          <div class="runner-terminal-body"><span class="runner-command">$ python main.py</span>
+<span class="runner-muted">Initializing Pyodide runtime...</span>
+<span class="runner-muted">Executing script...</span></div>
+        </div>
+      `;
 
       setButtonLoading(
         runBtn,
@@ -2491,6 +3650,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     document.getElementById('start-timer-btn').addEventListener('click', startTimer);
     document.getElementById('stop-timer-btn').addEventListener('click', stopTimer);
     document.getElementById('run-btn').addEventListener('click', runCode);
+    bottomTerminalTabs.forEach((tab) => {
+      tab.addEventListener('click', () => setBottomTerminalTab(tab.dataset.terminalTab || 'terminal'));
+    });
+    bottomTerminalNewBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      newBottomTerminalSession();
+    });
+    bottomTerminalSplitBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleBottomTerminalSplit();
+    });
+    bottomTerminalToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleBottomTerminal();
+    });
+    bottomTerminalHeader?.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+    });
+    bottomTerminalHeader?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleBottomTerminal();
+      }
+    });
+    bottomTerminalInput?.addEventListener('focus', () => {
+      if (!bottomTerminalInput.value.trim()) {
+        resetTerminalInput();
+      }
+    });
+    bottomTerminalInput?.addEventListener('keydown', (e) => {
+      handleProtectedTerminalKeydown(e);
+
+      if (e.defaultPrevented) return;
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        runBottomTerminalCommand();
+      }
+    });
+
+    bottomTerminalInput?.addEventListener('input', normalizeProtectedTerminalPrompt);
+    bottomTerminalInput?.addEventListener('click', keepCursorAfterTerminalPrompt);
+    bottomTerminalInput?.addEventListener('keyup', keepCursorAfterTerminalPrompt);
 
     document.getElementById('submit-btn').addEventListener('click', () => {
       recordEvent('submit_click');
@@ -2636,14 +3838,14 @@ json.dumps(result, ensure_ascii=False)
       const submitBtn = document.getElementById('submit-btn');
 
       if (!loggedInUser?.sub && !window.currentParticipantId) {
-        showToast('⚠️ Πρέπει να συνδεθείς πριν την υποβολή.', 'error');
+        showToast('⛔ Πρέπει να συνδεθείς πριν την υποβολή.', 'error');
         return;
       }
 
       const userCode = getEditorValue();
 
       if (!userCode.trim()) {
-        showToast('⚠️ Δεν υπάρχει κώδικας για υποβολή.', 'error');
+        showToast('⛔ Δεν υπάρχει κώδικας για υποβολή.', 'error');
         return;
       }
 
@@ -2759,6 +3961,7 @@ json.dumps(result, ensure_ascii=False)
       }
 
       appendAiBubble('user', formatTextToHtml(prompt));
+      const typingBubble = appendAiTypingBubble();
 
       aiStatusMini.textContent = "Calling...";
       aiLastRun.textContent = "Κλήση σε Gemini...";
@@ -2781,6 +3984,22 @@ json.dumps(result, ensure_ascii=False)
       })
       .then(res => res.json())
       .then(data => {
+        if (typingBubble) {
+          typingBubble.remove();
+        }
+
+        console.group('Gemini Debug');
+        console.log('Full response:', data);
+        console.log('Status:', data.status);
+        console.log('Text length:', data.text ? data.text.length : 0);
+        console.log('Finish reason:', data.finish_reason || 'none');
+        console.log('Rate limit:', data.rate_limit || null);
+        console.log('Participant ID:', data.participant_id || '');
+        console.log('AI panel height:', aiResultBody ? aiResultBody.clientHeight : null);
+        console.log('AI panel scroll height:', aiResultBody ? aiResultBody.scrollHeight : null);
+        console.log('Needs scroll:', aiResultBody ? aiResultBody.scrollHeight > aiResultBody.clientHeight : null);
+        console.groupEnd();
+
         if (data.status === 'ok') {
           aiRunCount++;
           aiSummary.textContent = `${aiRunCount} responses`;
@@ -2819,6 +4038,10 @@ json.dumps(result, ensure_ascii=False)
         }
       })
       .catch(err => {
+        if (typingBubble) {
+          typingBubble.remove();
+        }
+
         aiStatusMini.textContent = "Error";
         aiLastRun.textContent = "Σφάλμα σύνδεσης";
         appendAiBubble('assistant', "⚠️ Σφάλμα σύνδεσης με τον server.");
@@ -2882,7 +4105,7 @@ json.dumps(result, ensure_ascii=False)
       userPicture.style.display = "none";
 
       updateAiButtonState();
-      aiSetMessage("Συνδέσου με Google και μετά γράψε prompt.");
+      aiSetMessage("Sign in with Google to use the Gemini Assistant.");
     }
 
     function backendWhoAmI() {
@@ -2939,9 +4162,10 @@ json.dumps(result, ensure_ascii=False)
           document.getElementById("google-btn"),
           {
             theme: "outline",
-            size: "large",
+            size: "small",
             shape: "pill",
-            text: "signin_with"
+            text: "signin_with",
+            width: 104
           }
         );
       } else {
@@ -2954,8 +4178,8 @@ json.dumps(result, ensure_ascii=False)
       rightPanelVisible = visible;
       mainLayout.classList.toggle('video-hidden', !visible);
       toggleVideoBtn.innerHTML = visible
-        ? '<span class="icon">👁</span> Hide Chatbot'
-        : '<span class="icon">👁</span> Show Chatbot';
+        ? '<span class="icon">👁</span> Hide Chat'
+        : '<span class="icon">👁</span> Show Chat';
     }
 
     function applyPanelSplit(leftPercent) {
@@ -2971,7 +4195,7 @@ json.dumps(result, ensure_ascii=False)
       const minRightPx = 280;
       const maxRightPx = 700;
 
-      let safe = Math.max(25, Math.min(75, leftPercent));
+      let safe = Math.max(20, Math.min(65, leftPercent));
 
       let leftPx = (safe / 100) * totalWidth;
       let rightPx = totalWidth - leftPx - resizerWidth;
@@ -3056,6 +4280,12 @@ json.dumps(result, ensure_ascii=False)
 
     window.addEventListener('keydown', (e) => {
       const isMod = e.ctrlKey || e.metaKey;
+
+      if (isMod && e.code === 'Backquote') {
+        e.preventDefault();
+        toggleBottomTerminal();
+        return;
+      }
 
       if (isMod && !e.shiftKey && e.key === 'Enter') {
         e.preventDefault();
