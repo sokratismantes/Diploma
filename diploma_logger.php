@@ -1,466 +1,462 @@
 <?php
+
+declare(strict_types=1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * diploma_logger.php
- *
- * Καταγραφή ΜΟΝΟ objective success logs για το πείραμα:
- * video tutorial vs AI assistance στην υλοποίηση φθίνουσας μονοτονικής στοίβας.
- *
- * Βάση δεδομένων: diploma
- * Πίνακας: objective_success_logs
- *
- * Υποστηριζόμενα actions:
- * - save_objective_log
- * - save_submission
- * - get_objective_log
- * - get_objective_summary
- */
+require_once __DIR__ . '/ai_submission_evaluator.php';
 
-/**
- * =========================
- * DATABASE CONFIG
- * =========================
- */
 const DB_HOST = 'localhost';
 const DB_NAME = 'diploma';
 const DB_USER = 'root';
 const DB_PASS = '';
 const DB_CHARSET = 'utf8mb4';
-
-/**
- * Αν είναι true, δημιουργεί ΜΟΝΟ τον πίνακα objective_success_logs αν δεν υπάρχει.
- */
+const DEFAULT_TASK_ID = 'decreasing_monotonic_stack_v1';
 const AUTO_CREATE_TABLES = true;
 
-/**
- * Default task id για το δικό σου πείραμα.
- */
-const DEFAULT_TASK_ID = 'decreasing_monotonic_stack_v1';
-
-/**
- * =========================
- * REQUEST HANDLER
- * =========================
- */
 function diplomaLoggerHandleRequest(): void
 {
     header('Content-Type: application/json; charset=utf-8');
 
     try {
-        $pdo = getPdo();
-
+        $pdo = diplomaGetPdo();
         if (AUTO_CREATE_TABLES) {
-            createTablesIfNotExist($pdo);
+            diplomaCreateTables($pdo);
         }
 
-        $payload = getJsonPayload();
-        $action = $payload['action'] ?? $_POST['action'] ?? null;
-
-        if (!$action) {
-            jsonResponse(false, 'Missing action.');
-        }
+        $payload = diplomaReadPayload();
+        $action = (string)($payload['action'] ?? $_POST['action'] ?? '');
 
         switch ($action) {
             case 'save_objective_log':
             case 'save_submission':
-                saveObjectiveLog($pdo, $payload);
+                diplomaSaveObjectiveLog($pdo, $payload);
                 break;
 
             case 'get_objective_log':
-                getObjectiveLog($pdo, $payload);
+                diplomaGetObjectiveLog($pdo, $payload);
                 break;
 
             case 'get_objective_summary':
-                getObjectiveSummary($pdo, $payload);
+                diplomaGetObjectiveSummary($pdo, $payload);
                 break;
 
             default:
-                jsonResponse(false, 'Unknown action: ' . $action);
+                diplomaJsonResponse(false, 'Unknown or missing action.');
         }
     } catch (Throwable $e) {
         http_response_code(500);
-        jsonResponse(false, 'Server error: ' . $e->getMessage());
+        diplomaJsonResponse(false, 'Server error: ' . $e->getMessage());
     }
 }
 
-/**
- * Αν το αρχείο κληθεί απευθείας, χειρίζεται το request.
- * Αν γίνει require_once μέσα από loginn.php, απλώς φορτώνει τις συναρτήσεις.
- */
 if (realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === realpath(__FILE__)) {
     diplomaLoggerHandleRequest();
 }
 
-/**
- * =========================
- * PDO CONNECTION
- * =========================
- */
-function getPdo(): PDO
+function diplomaGetPdo(): PDO
 {
-    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
-
-    return new PDO($dsn, DB_USER, DB_PASS, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
+    return new PDO(
+        'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET,
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]
+    );
 }
 
-/**
- * =========================
- * TABLE
- * =========================
- */
-function createTablesIfNotExist(PDO $pdo): void
+function diplomaCreateTables(PDO $pdo): void
 {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS objective_success_logs (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
             user_id VARCHAR(100) NOT NULL,
             `condition` ENUM('ai_assistance', 'video_tutorial') NOT NULL,
             task_id VARCHAR(150) NOT NULL DEFAULT 'decreasing_monotonic_stack_v1',
-
             code_snapshot LONGTEXT NOT NULL,
-
             visible_test_passed TINYINT(1) NOT NULL DEFAULT 0,
             visible_test_output TEXT NULL,
-
             hidden_test_1_passed TINYINT(1) NOT NULL DEFAULT 0,
             hidden_test_1_output TEXT NULL,
-
             hidden_test_2_passed TINYINT(1) NOT NULL DEFAULT 0,
             hidden_test_2_output TEXT NULL,
-
             decreasing_property_passed TINYINT(1) NOT NULL DEFAULT 0,
             hardcoded_solution_detected TINYINT(1) NOT NULL DEFAULT 0,
-
             final_objective_success_score DECIMAL(5,2) NOT NULL DEFAULT 0.00,
             completed_successfully TINYINT(1) NOT NULL DEFAULT 0,
-
             INDEX idx_user_id (user_id),
             INDEX idx_condition (`condition`),
             INDEX idx_task_id (task_id),
             INDEX idx_score (final_objective_success_score),
-            INDEX idx_completed_successfully (completed_successfully),
-            INDEX idx_hardcoded_solution_detected (hardcoded_solution_detected)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            INDEX idx_completed_successfully (completed_successfully)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    // Ακριβώς ο υπάρχων πίνακας που έδωσε ο χρήστης.
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS ai_submission_evaluations (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            objective_log_id BIGINT UNSIGNED NOT NULL,
+            participant_id VARCHAR(100) NOT NULL,
+            evaluator_version VARCHAR(50) NOT NULL,
+            ai_model VARCHAR(100) NOT NULL,
+            evaluation_status ENUM('pending','completed','failed','manual_review') NOT NULL DEFAULT 'pending',
+            verdict ENUM('correct','partially_correct','incorrect','uncertain') NULL,
+            uses_required_algorithm TINYINT(1) NULL,
+            general_solution TINYINT(1) NULL,
+            hardcoding_detected TINYINT(1) NULL,
+            algorithm_score DECIMAL(5,2) NULL,
+            generality_score DECIMAL(5,2) NULL,
+            complexity_score DECIMAL(5,2) NULL,
+            robustness_score DECIMAL(5,2) NULL,
+            ai_evaluation_score DECIMAL(5,2) NULL,
+            confidence DECIMAL(5,4) NULL,
+            complexity_class VARCHAR(50) NULL,
+            rationale_codes JSON NULL,
+            evaluation_json LONGTEXT NULL,
+            code_hash CHAR(64) NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_ai_objective_log (objective_log_id),
+            INDEX idx_ai_participant (participant_id),
+            INDEX idx_ai_score (ai_evaluation_score),
+            INDEX idx_ai_status (evaluation_status),
+            INDEX idx_ai_verdict (verdict),
+            INDEX idx_ai_code_hash (code_hash),
+            CONSTRAINT fk_ai_evaluation_objective_log
+                FOREIGN KEY (objective_log_id)
+                REFERENCES objective_success_logs(id)
+                ON DELETE CASCADE
+                ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 }
 
-/**
- * =========================
- * ACTIONS
- * =========================
- */
-function saveObjectiveLog(PDO $pdo, array $payload): void
-{
-    $userId = trim((string)($payload['user_id'] ?? getSessionUserId()));
-    $condition = trim((string)($payload['condition'] ?? ''));
-    $taskId = trim((string)($payload['task_id'] ?? DEFAULT_TASK_ID));
-    $codeSnapshot = (string)($payload['code_snapshot'] ?? '');
-
-    if ($userId === '') {
-        jsonResponse(false, 'Missing user_id.');
-    }
-
-    if (!in_array($condition, ['ai_assistance', 'video_tutorial'], true)) {
-        jsonResponse(false, 'Invalid condition. Use ai_assistance or video_tutorial.');
-    }
-
-    if (trim($taskId) === '') {
-        $taskId = DEFAULT_TASK_ID;
-    }
-
-    if (trim($codeSnapshot) === '') {
-        jsonResponse(false, 'Missing code_snapshot.');
-    }
-
-    $visibleTestPassed = toBoolInt($payload['visible_test_passed'] ?? false);
-    $visibleTestOutput = isset($payload['visible_test_output'])
-        ? (string)$payload['visible_test_output']
-        : null;
-
-    $hiddenTest1Passed = toBoolInt($payload['hidden_test_1_passed'] ?? false);
-    $hiddenTest1Output = isset($payload['hidden_test_1_output'])
-        ? (string)$payload['hidden_test_1_output']
-        : null;
-
-    $hiddenTest2Passed = toBoolInt($payload['hidden_test_2_passed'] ?? false);
-    $hiddenTest2Output = isset($payload['hidden_test_2_output'])
-        ? (string)$payload['hidden_test_2_output']
-        : null;
-
-    $decreasingPropertyPassed = toBoolInt($payload['decreasing_property_passed'] ?? false);
-
-    /**
-     * Αν δεν σταλεί hardcoded_solution_detected,
-     * το υπολογίζουμε αντικειμενικά:
-     *
-     * hardcoded = true
-     * όταν περνάει το visible test
-     * αλλά αποτυγχάνει και στα δύο hidden tests.
-     */
-    if (array_key_exists('hardcoded_solution_detected', $payload)) {
-        $hardcodedSolutionDetected = toBoolInt($payload['hardcoded_solution_detected']);
-    } else {
-        $hardcodedSolutionDetected = (
-            $visibleTestPassed === 1 &&
-            $hiddenTest1Passed === 0 &&
-            $hiddenTest2Passed === 0
-        ) ? 1 : 0;
-    }
-
-    /**
-     * Objective success score:
-     *
-     * visible test = 40
-     * hidden test 1 = 20
-     * hidden test 2 = 20
-     * decreasing property = 20
-     */
-    $score =
-        ($visibleTestPassed * 40) +
-        ($hiddenTest1Passed * 20) +
-        ($hiddenTest2Passed * 20) +
-        ($decreasingPropertyPassed * 20);
-
-    /**
-     * Αν σταλεί final_objective_success_score χειροκίνητα,
-     * το αγνοούμε επίτηδες για να παραμείνει αντικειμενικός ο υπολογισμός.
-     */
-
-    /**
-     * Αυστηρός κανόνας επιτυχίας:
-     *
-     * completed_successfully = true
-     * μόνο αν περάσει όλα τα objective checks
-     * και δεν ανιχνευθεί hardcoded λύση.
-     */
-    $completedSuccessfully = (
-        $visibleTestPassed === 1 &&
-        $hiddenTest1Passed === 1 &&
-        $hiddenTest2Passed === 1 &&
-        $decreasingPropertyPassed === 1 &&
-        $hardcodedSolutionDetected === 0
-    ) ? 1 : 0;
-
-    $stmt = $pdo->prepare("
-        INSERT INTO objective_success_logs (
-            user_id,
-            `condition`,
-            task_id,
-            code_snapshot,
-
-            visible_test_passed,
-            visible_test_output,
-
-            hidden_test_1_passed,
-            hidden_test_1_output,
-
-            hidden_test_2_passed,
-            hidden_test_2_output,
-
-            decreasing_property_passed,
-            hardcoded_solution_detected,
-
-            final_objective_success_score,
-            completed_successfully
-        ) VALUES (
-            :user_id,
-            :condition,
-            :task_id,
-            :code_snapshot,
-
-            :visible_test_passed,
-            :visible_test_output,
-
-            :hidden_test_1_passed,
-            :hidden_test_1_output,
-
-            :hidden_test_2_passed,
-            :hidden_test_2_output,
-
-            :decreasing_property_passed,
-            :hardcoded_solution_detected,
-
-            :final_objective_success_score,
-            :completed_successfully
-        )
-    ");
-
-    $stmt->execute([
-        ':user_id' => $userId,
-        ':condition' => $condition,
-        ':task_id' => $taskId,
-        ':code_snapshot' => $codeSnapshot,
-
-        ':visible_test_passed' => $visibleTestPassed,
-        ':visible_test_output' => $visibleTestOutput,
-
-        ':hidden_test_1_passed' => $hiddenTest1Passed,
-        ':hidden_test_1_output' => $hiddenTest1Output,
-
-        ':hidden_test_2_passed' => $hiddenTest2Passed,
-        ':hidden_test_2_output' => $hiddenTest2Output,
-
-        ':decreasing_property_passed' => $decreasingPropertyPassed,
-        ':hardcoded_solution_detected' => $hardcodedSolutionDetected,
-
-        ':final_objective_success_score' => $score,
-        ':completed_successfully' => $completedSuccessfully,
-    ]);
-
-    $logId = (int)$pdo->lastInsertId();
-
-    jsonResponse(true, 'Objective log saved.', [
-        'id' => $logId,
-        'user_id' => $userId,
-        'condition' => $condition,
-        'task_id' => $taskId,
-
-        'visible_test_passed' => (bool)$visibleTestPassed,
-        'hidden_test_1_passed' => (bool)$hiddenTest1Passed,
-        'hidden_test_2_passed' => (bool)$hiddenTest2Passed,
-        'decreasing_property_passed' => (bool)$decreasingPropertyPassed,
-        'hardcoded_solution_detected' => (bool)$hardcodedSolutionDetected,
-
-        'final_objective_success_score' => $score,
-        'completed_successfully' => (bool)$completedSuccessfully,
-    ]);
-}
-
-function getObjectiveLog(PDO $pdo, array $payload): void
-{
-    $id = (int)($payload['id'] ?? 0);
-
-    if ($id <= 0) {
-        jsonResponse(false, 'Missing id.');
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT *
-        FROM objective_success_logs
-        WHERE id = :id
-        LIMIT 1
-    ");
-
-    $stmt->execute([':id' => $id]);
-    $row = $stmt->fetch();
-
-    if (!$row) {
-        jsonResponse(false, 'Objective log not found.');
-    }
-
-    jsonResponse(true, 'Objective log found.', $row);
-}
-
-function getObjectiveSummary(PDO $pdo, array $payload): void
-{
-    $condition = trim((string)($payload['condition'] ?? ''));
-
-    $where = '';
-    $params = [];
-
-    if ($condition !== '') {
-        if (!in_array($condition, ['ai_assistance', 'video_tutorial'], true)) {
-            jsonResponse(false, 'Invalid condition. Use ai_assistance or video_tutorial.');
-        }
-
-        $where = 'WHERE `condition` = :condition';
-        $params[':condition'] = $condition;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT
-            `condition`,
-            COUNT(*) AS total_logs,
-            AVG(final_objective_success_score) AS average_score,
-            SUM(completed_successfully) AS completed_successfully_count,
-            SUM(hardcoded_solution_detected) AS hardcoded_solution_count,
-            SUM(visible_test_passed) AS visible_passed_count,
-            SUM(hidden_test_1_passed) AS hidden_1_passed_count,
-            SUM(hidden_test_2_passed) AS hidden_2_passed_count,
-            SUM(decreasing_property_passed) AS decreasing_property_passed_count
-        FROM objective_success_logs
-        $where
-        GROUP BY `condition`
-    ");
-
-    $stmt->execute($params);
-    $rows = $stmt->fetchAll();
-
-    jsonResponse(true, 'Objective summary.', [
-        'summary' => $rows,
-    ]);
-}
-
-/**
- * =========================
- * HELPERS
- * =========================
- */
-function getJsonPayload(): array
+function diplomaReadPayload(): array
 {
     $raw = file_get_contents('php://input');
-
-    if ($raw === false || trim($raw) === '') {
-        return $_POST ?: [];
+    if (is_string($raw) && trim($raw) !== '') {
+        $json = json_decode($raw, true);
+        if (is_array($json)) {
+            return $json;
+        }
     }
 
-    $data = json_decode($raw, true);
-
-    if (!is_array($data)) {
-        return $_POST ?: [];
-    }
-
-    return $data;
+    return $_POST;
 }
 
-function getSessionUserId(): string
+function diplomaParticipantId(array $payload): string
 {
-    if (!empty($_SESSION['user']['sub'])) {
-        return (string)$_SESSION['user']['sub'];
+    $sessionId = trim((string)($_SESSION['participant_id'] ?? ''));
+    if ($sessionId !== '') {
+        return $sessionId;
     }
 
-    if (!empty($_SESSION['participant_id'])) {
-        return (string)$_SESSION['participant_id'];
-    }
-
-    return '';
+    return trim((string)($payload['participant_id'] ?? $payload['user_id'] ?? ''));
 }
 
-function toBoolInt($value): int
+function diplomaBoolInt(mixed $value): int
 {
     if (is_bool($value)) {
         return $value ? 1 : 0;
     }
 
-    if (is_int($value)) {
-        return $value === 1 ? 1 : 0;
-    }
-
-    if (is_float($value)) {
-        return ((int)$value) === 1 ? 1 : 0;
-    }
-
-    $normalized = strtolower(trim((string)$value));
-
-    return in_array($normalized, ['1', 'true', 'yes', 'on'], true) ? 1 : 0;
+    return in_array(strtolower(trim((string)$value)), ['1', 'true', 'yes', 'on'], true) ? 1 : 0;
 }
 
-function jsonResponse(bool $success, string $message, array $data = []): void
+function diplomaSaveObjectiveLog(PDO $pdo, array $payload): void
 {
-    echo json_encode([
-        'success' => $success,
-        'message' => $message,
-        'data' => $data,
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $participantId = diplomaParticipantId($payload);
+    $condition = trim((string)($payload['condition'] ?? ''));
+    $taskId = trim((string)($payload['task_id'] ?? DEFAULT_TASK_ID));
+    $code = (string)($payload['code_snapshot'] ?? '');
+
+    if ($participantId === '') {
+        diplomaJsonResponse(false, 'Missing participant_id.');
+    }
+    if (!in_array($condition, ['ai_assistance', 'video_tutorial'], true)) {
+        diplomaJsonResponse(false, 'Invalid condition.');
+    }
+    if (trim($code) === '') {
+        diplomaJsonResponse(false, 'Missing code_snapshot.');
+    }
+
+    $tests = [
+        'visible_test_passed' => diplomaBoolInt($payload['visible_test_passed'] ?? false),
+        'visible_test_output' => isset($payload['visible_test_output']) ? (string)$payload['visible_test_output'] : null,
+        'hidden_test_1_passed' => diplomaBoolInt($payload['hidden_test_1_passed'] ?? false),
+        'hidden_test_1_output' => isset($payload['hidden_test_1_output']) ? (string)$payload['hidden_test_1_output'] : null,
+        'hidden_test_2_passed' => diplomaBoolInt($payload['hidden_test_2_passed'] ?? false),
+        'hidden_test_2_output' => isset($payload['hidden_test_2_output']) ? (string)$payload['hidden_test_2_output'] : null,
+        'decreasing_property_passed' => diplomaBoolInt($payload['decreasing_property_passed'] ?? false),
+    ];
+
+    $deterministicScore =
+        ($tests['visible_test_passed'] * 20) +
+        ($tests['hidden_test_1_passed'] * 20) +
+        ($tests['hidden_test_2_passed'] * 20) +
+        ($tests['decreasing_property_passed'] * 20);
+
+    $ruleHardcoded =
+        $tests['visible_test_passed'] === 1 &&
+        $tests['hidden_test_1_passed'] === 0 &&
+        $tests['hidden_test_2_passed'] === 0;
+
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO objective_success_logs (
+                user_id, `condition`, task_id, code_snapshot,
+                visible_test_passed, visible_test_output,
+                hidden_test_1_passed, hidden_test_1_output,
+                hidden_test_2_passed, hidden_test_2_output,
+                decreasing_property_passed, hardcoded_solution_detected,
+                final_objective_success_score, completed_successfully
+            ) VALUES (
+                :user_id, :condition, :task_id, :code_snapshot,
+                :visible_test_passed, :visible_test_output,
+                :hidden_test_1_passed, :hidden_test_1_output,
+                :hidden_test_2_passed, :hidden_test_2_output,
+                :decreasing_property_passed, :hardcoded_solution_detected,
+                :final_score, 0
+            )
+        ");
+        $stmt->execute([
+            ':user_id' => $participantId,
+            ':condition' => $condition,
+            ':task_id' => $taskId !== '' ? $taskId : DEFAULT_TASK_ID,
+            ':code_snapshot' => $code,
+            ':visible_test_passed' => $tests['visible_test_passed'],
+            ':visible_test_output' => $tests['visible_test_output'],
+            ':hidden_test_1_passed' => $tests['hidden_test_1_passed'],
+            ':hidden_test_1_output' => $tests['hidden_test_1_output'],
+            ':hidden_test_2_passed' => $tests['hidden_test_2_passed'],
+            ':hidden_test_2_output' => $tests['hidden_test_2_output'],
+            ':decreasing_property_passed' => $tests['decreasing_property_passed'],
+            ':hardcoded_solution_detected' => $ruleHardcoded ? 1 : 0,
+            ':final_score' => $deterministicScore,
+        ]);
+        $objectiveLogId = (int)$pdo->lastInsertId();
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+
+    $evaluation = null;
+    $evaluationError = null;
+    $evaluationStatus = 'failed';
+
+    try {
+        $evaluation = evaluateSubmissionWithAi($pdo, $code, $tests);
+        $evaluationStatus = ((float)($evaluation['confidence'] ?? 0) < 0.70)
+            ? 'manual_review'
+            : 'completed';
+    } catch (Throwable $e) {
+        $evaluationError = $e->getMessage();
+        error_log('[AI EVALUATOR] ' . $evaluationError);
+    }
+
+    $aiScore = $evaluation !== null ? (float)($evaluation['total_score'] ?? 0) : 0.0;
+    $finalScore = min(100.0, round($deterministicScore + ($aiScore * 0.20), 2));
+    $hardcoded = $ruleHardcoded || !empty($evaluation['hardcoding_detected']);
+
+    $allTestsPassed =
+        $tests['visible_test_passed'] === 1 &&
+        $tests['hidden_test_1_passed'] === 1 &&
+        $tests['hidden_test_2_passed'] === 1 &&
+        $tests['decreasing_property_passed'] === 1;
+
+    $completed =
+        $allTestsPassed &&
+        $evaluationStatus === 'completed' &&
+        ($evaluation['verdict'] ?? '') === 'correct' &&
+        !empty($evaluation['uses_required_algorithm']) &&
+        !empty($evaluation['general_solution']) &&
+        !$hardcoded;
+
+    $evaluationJson = $evaluation !== null
+        ? $evaluation
+        : [
+            'status' => 'error',
+            'error' => $evaluationError,
+            'evaluator_version' => AI_EVALUATOR_VERSION,
+            'model' => AI_EVALUATOR_MODEL,
+        ];
+
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO ai_submission_evaluations (
+                objective_log_id, participant_id, evaluator_version, ai_model,
+                evaluation_status, verdict, uses_required_algorithm,
+                general_solution, hardcoding_detected,
+                algorithm_score, generality_score, complexity_score,
+                robustness_score, ai_evaluation_score, confidence,
+                complexity_class, rationale_codes, evaluation_json, code_hash
+            ) VALUES (
+                :objective_log_id, :participant_id, :evaluator_version, :ai_model,
+                :evaluation_status, :verdict, :uses_required_algorithm,
+                :general_solution, :hardcoding_detected,
+                :algorithm_score, :generality_score, :complexity_score,
+                :robustness_score, :ai_evaluation_score, :confidence,
+                :complexity_class, :rationale_codes, :evaluation_json, :code_hash
+            )
+            ON DUPLICATE KEY UPDATE
+                participant_id = VALUES(participant_id),
+                evaluator_version = VALUES(evaluator_version),
+                ai_model = VALUES(ai_model),
+                evaluation_status = VALUES(evaluation_status),
+                verdict = VALUES(verdict),
+                uses_required_algorithm = VALUES(uses_required_algorithm),
+                general_solution = VALUES(general_solution),
+                hardcoding_detected = VALUES(hardcoding_detected),
+                algorithm_score = VALUES(algorithm_score),
+                generality_score = VALUES(generality_score),
+                complexity_score = VALUES(complexity_score),
+                robustness_score = VALUES(robustness_score),
+                ai_evaluation_score = VALUES(ai_evaluation_score),
+                confidence = VALUES(confidence),
+                complexity_class = VALUES(complexity_class),
+                rationale_codes = VALUES(rationale_codes),
+                evaluation_json = VALUES(evaluation_json),
+                code_hash = VALUES(code_hash),
+                updated_at = NOW()
+        ");
+        $stmt->execute([
+            ':objective_log_id' => $objectiveLogId,
+            ':participant_id' => $participantId,
+            ':evaluator_version' => $evaluation['evaluator_version'] ?? AI_EVALUATOR_VERSION,
+            ':ai_model' => $evaluation['model'] ?? AI_EVALUATOR_MODEL,
+            ':evaluation_status' => $evaluationStatus,
+            ':verdict' => $evaluation['verdict'] ?? null,
+            ':uses_required_algorithm' => isset($evaluation['uses_required_algorithm']) ? (int)$evaluation['uses_required_algorithm'] : null,
+            ':general_solution' => isset($evaluation['general_solution']) ? (int)$evaluation['general_solution'] : null,
+            ':hardcoding_detected' => isset($evaluation['hardcoding_detected']) ? (int)$evaluation['hardcoding_detected'] : null,
+            ':algorithm_score' => $evaluation['algorithm_score'] ?? null,
+            ':generality_score' => $evaluation['generality_score'] ?? null,
+            ':complexity_score' => $evaluation['complexity_score'] ?? null,
+            ':robustness_score' => $evaluation['robustness_score'] ?? null,
+            ':ai_evaluation_score' => $evaluation !== null ? $aiScore : null,
+            ':confidence' => $evaluation['confidence'] ?? null,
+            ':complexity_class' => $evaluation['complexity_class'] ?? null,
+            ':rationale_codes' => $evaluation !== null
+                ? json_encode($evaluation['rationale_codes'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                : null,
+            ':evaluation_json' => json_encode($evaluationJson, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            ':code_hash' => hash('sha256', aiEvaluatorNormalizeCode($code)),
+        ]);
+
+        $update = $pdo->prepare("
+            UPDATE objective_success_logs
+            SET hardcoded_solution_detected = :hardcoded,
+                final_objective_success_score = :final_score,
+                completed_successfully = :completed
+            WHERE id = :id
+        ");
+        $update->execute([
+            ':hardcoded' => $hardcoded ? 1 : 0,
+            ':final_score' => $finalScore,
+            ':completed' => $completed ? 1 : 0,
+            ':id' => $objectiveLogId,
+        ]);
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+
+    diplomaJsonResponse(true, 'Objective log and AI evaluation saved.', [
+        'id' => $objectiveLogId,
+        'objective_log_id' => $objectiveLogId,
+        'participant_id' => $participantId,
+        'condition' => $condition,
+        'task_id' => $taskId,
+        'deterministic_test_score' => $deterministicScore,
+        'ai_evaluation_status' => $evaluationStatus,
+        'ai_evaluation_score' => $evaluation !== null ? $aiScore : null,
+        'ai_verdict' => $evaluation['verdict'] ?? null,
+        'ai_error' => $evaluationError,
+        'final_objective_success_score' => $finalScore,
+        'hardcoded_solution_detected' => $hardcoded,
+        'completed_successfully' => $completed,
+    ]);
+}
+
+function diplomaGetObjectiveLog(PDO $pdo, array $payload): void
+{
+    $id = (int)($payload['id'] ?? $payload['objective_log_id'] ?? 0);
+    if ($id <= 0) {
+        diplomaJsonResponse(false, 'Invalid objective log id.');
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT osl.*, aie.evaluation_status, aie.evaluator_version, aie.ai_model,
+               aie.verdict, aie.uses_required_algorithm, aie.general_solution,
+               aie.hardcoding_detected, aie.algorithm_score, aie.generality_score,
+               aie.complexity_score, aie.robustness_score, aie.ai_evaluation_score,
+               aie.confidence, aie.complexity_class, aie.rationale_codes,
+               aie.evaluation_json, aie.updated_at AS ai_updated_at
+        FROM objective_success_logs osl
+        LEFT JOIN ai_submission_evaluations aie ON aie.objective_log_id = osl.id
+        WHERE osl.id = :id
+        LIMIT 1
+    ");
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        diplomaJsonResponse(false, 'Objective log not found.');
+    }
+
+    diplomaJsonResponse(true, 'Objective log loaded.', ['log' => $row]);
+}
+
+function diplomaGetObjectiveSummary(PDO $pdo, array $payload): void
+{
+    $participantId = diplomaParticipantId($payload);
+    $where = '';
+    $params = [];
+
+    if ($participantId !== '') {
+        $where = 'WHERE osl.user_id = :participant_id';
+        $params[':participant_id'] = $participantId;
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) AS total_submissions,
+            SUM(osl.completed_successfully = 1) AS successful_submissions,
+            ROUND(AVG(osl.final_objective_success_score), 2) AS average_final_score,
+            ROUND(AVG(aie.ai_evaluation_score), 2) AS average_ai_score,
+            SUM(aie.evaluation_status = 'completed') AS completed_ai_evaluations,
+            SUM(aie.evaluation_status = 'failed') AS failed_ai_evaluations,
+            SUM(aie.evaluation_status = 'manual_review') AS manual_review_evaluations
+        FROM objective_success_logs osl
+        LEFT JOIN ai_submission_evaluations aie ON aie.objective_log_id = osl.id
+        {$where}
+    ");
+    $stmt->execute($params);
+
+    diplomaJsonResponse(true, 'Objective summary loaded.', ['summary' => $stmt->fetch()]);
+}
+
+function diplomaJsonResponse(bool $ok, string $message, array $data = []): never
+{
+    echo json_encode(
+        array_merge(['ok' => $ok, 'message' => $message], $data),
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
     exit;
 }
